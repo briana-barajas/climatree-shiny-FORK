@@ -72,10 +72,6 @@ body <- dashboardBody(
               
             ) # end of fluidRow
             
-            
-            
-            
-            
     ), # END about tabItem 
     
     # dashboard tabItem ----
@@ -86,61 +82,59 @@ body <- dashboardBody(
               
               # input box ----
               box(width = 8,
-                  title = tagList(icon("tree"), strong("Mapping Tree Vulnerabilty ")),
+                  title = tagList(icon("tree"), strong("Mapping Tree Vulnerabilty")),
                   includeMarkdown("text/mapping-tree-vulnerability.md"),
-                  #start box 
+                  #start flowLayout
                   flowLayout(
-                    
-                  
-                  # "selectInputs here"
-                  selectInput(inputId = "common_name",
+                  #"selectInputs here"
+                  selectInput(inputId = "common_name_input",
                               label = "Common Name",
-                              choices = c("Common Name"="",species_data_names$common_name),
+                              choices = c("Common Name"="", unique(combined_pred$common_name)),
                               multiple=TRUE,
                               selectize = TRUE,
                               width = NULL,
                               size = NULL),
-                  selectInput(inputId = "species_name",
+                  selectInput(inputId = "sci_name_input",
                               label = "Scientific Name",
-                              choices = c("Scientific Name"="",species_data_names$spp),
+                              choices = c("Scientific Name"="",unique(combined_pred$spp)),
                               multiple=FALSE,
                               selectize = TRUE,
                               width = NULL,
                               size = NULL),
-                  selectInput(inputId = "species_code",
+                  selectInput(inputId = "sp_code_input",
                               label = "Species Code",
-                              choices = c("4 Letter Code"="",species_data_names$sp_code),
+                              choices = c("4 Letter Code"="", unique(combined_pred$sp_code)),
                               multiple=FALSE,
                               selectize = TRUE,
                               width = NULL,
                               size = NULL)
-                  ), # end sliderinputs 
+                  ) # end selectInputs 
                   # "map input here" 
-                  verticalLayout(
-                    radioButtons(inputId = "map_type_button", 
-                                              label = "Choose map type:",
-                                              c("Vulnerabilty " = "rwi_pred_change_mean",
-                                                "Sensitivity" = "cwd_sens"),
-                                              inline = TRUE))
-                  
-              ), # END input box
+                  # verticalLayout(
+                  #   radioGroupButtons(inputId = "map_type_button", 
+                  #                label = "Choose map type:",
+                  #                choices = names(combined_pred_raster))
+                  ),
+                 # END input box --
               # map interpretation box ---
               box(width = 4,
-                  title = tags$strong("Interpretation"),
-                  includeMarkdown("text/interpretion.md")
-                  )
-            ), # end fluid row
+                  title = tags$strong("Transparency"),
+                  includeMarkdown("text/transparency.md")
+                  ),
+            
+    ),# end of fluidRow
               
               # leaflet box ----
               box(width = 8,
-
-                  title = tags$strong("Test Map Output"),
-
-                  #leaflet otuput ----
-                  leafletOutput(outputId = "test_map_output") %>%
-                    withSpinner(type = 1, color = "cyan4")
-
-              ), # END leaflet box
+                      
+                      title = tags$strong("Tree Species Sensitivity to CWD"),
+                      
+                      # interactive map output ----
+                      leafletOutput(outputId = "map_output")
+                      
+                      
+                      
+                  ), # END leaflet box
               
               
             #), # END fluidRow
@@ -148,7 +142,7 @@ body <- dashboardBody(
               
               # map interpretation box ---
               box(width = 4,
-                  title = tags$strong("Interpretation")
+                  title = tags$strong("Summary Statistics")
                   ) # end interpretation box 
               
             
@@ -159,11 +153,36 @@ body <- dashboardBody(
             
             # fluidRow ----
             fluidRow(
-              # input species codebox ----
-              box(width = 12,
-                  title = tagList(icon("floppy-disk"), strong("Data"))
-              )# end species code box 
-            )# END fluidRow
+              # input species box ----
+              box(width = 6,
+                  
+                  title = tagList(icon("floppy-disk"), strong("Data")),
+                  
+                  # start select Input
+                  pickerInput(inputId = "sp_code_data_input",
+                              label = "Select one or more species of interest by code, \n then click download:",
+                              choices = unique(combined_pred$sp_code),
+                              selected = NULL,
+                              multiple = TRUE,
+                              width = "60%",
+                              inline = FALSE,
+                              options = list(`actions-box` = TRUE, subtext = "subtext")),
+                  
+              ),# END input species box 
+              box(width = 6,
+                  # Button
+                  "Click here to Download Data",br(),
+                  downloadButton("downloadData", "Download")
+                  )
+                  
+            ),# END fluidRow
+            # fluid row for example table
+            fluidRow(
+              box( width = 12,
+              DT::dataTableOutput(outputId = "data_table_output") %>% 
+                withSpinner(color = "#cb9e72", type = 1)
+              )
+            )
     ) # END data tabItem
     
   ) # END tabItems
