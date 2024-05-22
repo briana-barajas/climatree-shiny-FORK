@@ -30,6 +30,8 @@ server <- function(input, output) {
                  
                }) # END sp_code render Leaflet
                output$max_sens_box <- renderValueBox({
+                 validate(need(input$sp_code_input, 'Select a species to begin'))
+                 
                  
                  # clean input name
                  cleaned_input <- gsub(" ", "_", input$sp_code_input)
@@ -43,7 +45,7 @@ server <- function(input, output) {
                
                output$min_sens_box <- renderValueBox({
                  
-                 validate(need(input$sp_code_input, 'Select a species to begin'))
+                 validate(need(input$sp_code_input, ''))
                  
                  # clean input name
                  cleaned_input <- gsub(" ", "_", input$sp_code_input)
@@ -56,6 +58,8 @@ server <- function(input, output) {
                })
                
                output$mean_sens_box <- renderValueBox({
+                 validate(need(input$sp_code_input, ''))
+                 
                  
                  # clean input name
                  cleaned_input <- gsub(" ", "_", input$sp_code_input)
@@ -98,7 +102,9 @@ server <- function(input, output) {
                              title = "Relative Sensitivity")
                  
                }) # END sci_name render Leaflet
+               
                output$max_sens_box <- renderValueBox({
+                 validate(need(input$sci_name_input, 'Select a species to begin'))
                  
                  # clean input name
                  cleaned_input <- gsub(" ", "_", input$sci_name_input)
@@ -106,12 +112,13 @@ server <- function(input, output) {
                  # select raster
                  single_spp <- common_name_rast_list[[cleaned_input]]
                  
-                 valueBox(value = round(maxValue(single_spp$cwd_sens), digits = 2), subtitle = "Max Sensitivty", icon = icon("tree"),
-                          color = "purple"
-                 )
+                 valueBox(value = round(maxValue(single_spp$cwd_sens), digits = 2), subtitle = "Max Sensitivty", icon = icon("tree")
+                          )
                })
                
+               
                output$min_sens_box <- renderValueBox({
+                 validate(need(input$sci_name_input, 'Select a species to begin'))
                  
                  # clean input name
                  cleaned_input <- gsub(" ", "_", input$sci_name_input)
@@ -119,12 +126,12 @@ server <- function(input, output) {
                  # select raster
                  single_spp <- common_name_rast_list[[cleaned_input]]
                  
-                 valueBox(value = round(minValue(single_spp$cwd_sens), digits = 2), subtitle = "Min Sensitivty", icon = icon("tree"),
-                          color = "yellow"
+                 valueBox(value = round(minValue(single_spp$cwd_sens), digits = 2), subtitle = "Min Sensitivty", icon = icon("tree")
                  )
                })
                
                output$mean_sens_box <- renderValueBox({
+                 validate(need(input$sci_name_input, 'Select a species to begin'))
                  
                  # clean input name
                  cleaned_input <- gsub(" ", "_", input$sci_name_input)
@@ -132,11 +139,9 @@ server <- function(input, output) {
                  # select raster
                  single_spp <- common_name_rast_list[[cleaned_input]]
                  
-                 valueBox(value = round(cellStats(single_spp$cwd_sens, stat = 'mean'), digits = 2), subtitle = "Average Sensitivty", icon = icon("tree"),
-                          color = "blue"
+                 valueBox(value = round(cellStats(single_spp$cwd_sens, stat = 'mean'), digits = 2), subtitle = "Average Sensitivty", icon = icon("tree")
                  )
                })
-               
                
                }
                
