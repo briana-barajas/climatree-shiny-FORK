@@ -1,2 +1,2 @@
-Change transparency of the map depending on the map tiles
+Change transparency of the map <!--depending on the map tiles -->
 

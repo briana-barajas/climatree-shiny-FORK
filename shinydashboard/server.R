@@ -6,36 +6,76 @@ server <- function(input, output) {
   ## ======================================================
   ##                   Map by Species Code             ----
   ## ======================================================  
-  observeEvent(input$sp_code_input,
+  observeEvent(input$sp_code_input, {
+               
                output$map_output <- renderLeaflet({
+                 validate(need(input$sp_code_input, 'Select a species to begin'))
                  
                  # select raster
                  single_spp <- code_rast_list[[input$sp_code_input]]
                  
                  # create palette
-                 pal <- colorQuantile(c("#E56C3A", "#F9E0D2", "#72BFE6","#144D6F"),
+                 pal <- colorQuantile(c("#B03B12", "#EC9971", "#F9E0D2", "#144D6F"),
                                       single_spp$cwd_sens,
                                       n = 4,
                                       na.color = "transparent")
                  
                  # plot
                  leaflet() %>% addTiles() %>%
-                   addRasterImage(single_spp, colors = pal, opacity = 0.8) %>%
-                   addLegend(colors = c("#E56C3A", "#F9E0D2", "#72BFE6","#144D6F"),
-                             labels = c("Highly Sensitive", "Moderately Sensitive", "Not Sensitive", "Least Concern"),
+                   addRasterImage(single_spp, colors = pal, opacity = input$map_transparency_input) %>%
+                   addLegend(colors = c("#B03B12", "#EC9971", "#F9E0D2", "#144D6F"),
+                             labels = c("High Sensitivity", "Moderate Sensitivity", "Low Sensitivity", "Least Concern"),
                              values = values(single_spp),
                              title = "Relative Sensitivity")
                  
                }) # END sp_code render Leaflet
+               output$max_sens_box <- renderValueBox({
+                 
+                 # clean input name
+                 cleaned_input <- gsub(" ", "_", input$sp_code_input)
+                 
+                 # select raster
+                 single_spp <- common_name_rast_list[[cleaned_input]]
+                 
+                 valueBox(value = round(maxValue(single_spp$cwd_sens), digits = 2), subtitle = "Max Sensitivty", icon = icon("tree")
+                 )
+               })
                
-  ) # END sp_code observeEvent
+               output$min_sens_box <- renderValueBox({
+                 
+                 validate(need(input$sp_code_input, 'Select a species to begin'))
+                 
+                 # clean input name
+                 cleaned_input <- gsub(" ", "_", input$sp_code_input)
+                 
+                 # select raster
+                 single_spp <- common_name_rast_list[[cleaned_input]]
+                 
+                 valueBox(value = round(minValue(single_spp$cwd_sens), digits = 2), subtitle = "Min Sensitivty", icon = icon("tree")
+                 )
+               })
+               
+               output$mean_sens_box <- renderValueBox({
+                 
+                 # clean input name
+                 cleaned_input <- gsub(" ", "_", input$sp_code_input)
+                 
+                 # select raster
+                 single_spp <- common_name_rast_list[[cleaned_input]]
+                 
+                 valueBox(value = round(cellStats(single_spp$cwd_sens, stat = 'mean'), digits = 2), subtitle = "Average Sensitivty", icon = icon("tree")
+                 )
+               })
+               }# END sp_code observeEvent
+  )
   
   
   ## ======================================================
   ##                  Map by Scientific Name           ----
   ## ====================================================== 
-  observeEvent(input$sci_name_input,
+  observeEvent(input$sci_name_input,{
                output$map_output <- renderLeaflet({
+                 validate(need(input$sci_name_input, 'Select a species to begin'))
                  
                  # clean input name
                  cleaned_input <- gsub(" ", "_", input$sci_name_input)
@@ -44,20 +84,61 @@ server <- function(input, output) {
                  single_spp <- sci_name_rast_list[[cleaned_input]]
                  
                  # create palette
-                 pal <- colorQuantile(c("#E56C3A", "#F9E0D2", "#72BFE6","#144D6F"),
+                 pal <- colorQuantile(c("#B03B12", "#EC9971", "#F9E0D2", "#144D6F"),
                                       single_spp$cwd_sens,
                                       n = 4,
                                       na.color = "transparent")
                  
                  # plot
                  leaflet() %>% addTiles() %>%
-                   addRasterImage(single_spp, colors = pal, opacity = 0.8) %>%
-                   addLegend(colors = c("#E56C3A", "#F9E0D2", "#72BFE6","#144D6F"),
-                             labels = c("Highly Sensitive", "Moderately Sensitive", "Not Sensitive", "Least Concern"),
+                   addRasterImage(single_spp, colors = pal, opacity = input$map_transparency_input) %>%
+                   addLegend(colors = c("#B03B12", "#EC9971", "#F9E0D2", "#144D6F"),
+                             labels = c("High Sensitivity", "Moderate Sensitivity", "Low Sensitivity", "Least Concern"),
                              values = values(single_spp),
                              title = "Relative Sensitivity")
                  
                }) # END sci_name render Leaflet
+               output$max_sens_box <- renderValueBox({
+                 
+                 # clean input name
+                 cleaned_input <- gsub(" ", "_", input$sci_name_input)
+                 
+                 # select raster
+                 single_spp <- common_name_rast_list[[cleaned_input]]
+                 
+                 valueBox(value = round(maxValue(single_spp$cwd_sens), digits = 2), subtitle = "Max Sensitivty", icon = icon("tree"),
+                          color = "purple"
+                 )
+               })
+               
+               output$min_sens_box <- renderValueBox({
+                 
+                 # clean input name
+                 cleaned_input <- gsub(" ", "_", input$sci_name_input)
+                 
+                 # select raster
+                 single_spp <- common_name_rast_list[[cleaned_input]]
+                 
+                 valueBox(value = round(minValue(single_spp$cwd_sens), digits = 2), subtitle = "Min Sensitivty", icon = icon("tree"),
+                          color = "yellow"
+                 )
+               })
+               
+               output$mean_sens_box <- renderValueBox({
+                 
+                 # clean input name
+                 cleaned_input <- gsub(" ", "_", input$sci_name_input)
+                 
+                 # select raster
+                 single_spp <- common_name_rast_list[[cleaned_input]]
+                 
+                 valueBox(value = round(cellStats(single_spp$cwd_sens, stat = 'mean'), digits = 2), subtitle = "Average Sensitivty", icon = icon("tree"),
+                          color = "blue"
+                 )
+               })
+               
+               
+               }
                
   ) # END sci_name observeEvent
   
@@ -65,8 +146,36 @@ server <- function(input, output) {
   ## ======================================================
   ##                  Map by Common Name               ----
   ## ====================================================== 
-  observeEvent(input$common_name_input,
+  
+  
+  observeEvent(input$common_name_input, {
+ 
                output$map_output <- renderLeaflet({
+                 validate(need(input$common_name_input, 'Select a species to begin'))
+                 
+                 # clean input name
+                 cleaned_input <- gsub(" ", "_", input$common_name_input)
+
+                 # select raster
+                 single_spp <- common_name_rast_list[[cleaned_input]]
+                 
+                 # create palette
+                 pal <- colorQuantile(c("#B03B12", "#EC9971", "#F9E0D2", "#144D6F"),
+                                      single_spp$cwd_sens,
+                                      n = 4,
+                                      na.color = "transparent")
+                 
+                 # plot
+                 leaflet() %>% addTiles() %>%
+                   addRasterImage(single_spp, colors = pal, opacity = input$map_transparency_input) %>%
+                   addLegend(colors = c("#B03B12", "#EC9971", "#F9E0D2", "#144D6F"),
+                             labels = c("High Sensitivity", "Moderate Sensitivity", "Low Sensitivity", "Least Concern"),
+                             values = values(single_spp),
+                             title = "Relative Sensitivity")
+                 
+               }) # END common_name render Leaflet
+               output$max_sens_box <- renderValueBox({
+                 validate(need(input$common_name_input, 'Select a species to begin'))
                  
                  # clean input name
                  cleaned_input <- gsub(" ", "_", input$common_name_input)
@@ -74,25 +183,40 @@ server <- function(input, output) {
                  # select raster
                  single_spp <- common_name_rast_list[[cleaned_input]]
                  
-                 # create palette
-                 pal <- colorQuantile(c("#E56C3A", "#F9E0D2", "#72BFE6","#144D6F"),
-                                      single_spp$cwd_sens,
-                                      n = 4,
-                                      na.color = "transparent")
-                 
-                 # plot
-                 leaflet() %>% addTiles() %>%
-                   addRasterImage(single_spp, colors = pal, opacity = 0.8) %>%
-                   addLegend(colors = c("#E56C3A", "#F9E0D2", "#72BFE6","#144D6F"),
-                             labels = c("Highly Sensitive", "Moderately Sensitive", "Not Sensitive", "Least Concern"),
-                             values = values(single_spp),
-                             title = "Relative Sensitivity")
-                 
-               }) # END common_name render Leaflet
+                 valueBox(value = round(maxValue(single_spp$cwd_sens), digits = 2), subtitle = "Max Sensitivty", icon = icon("tree")
+                 )
+               })
                
-  ) # END common_name observeEvent
+               output$min_sens_box <- renderValueBox({
+                 
+                 validate(need(input$common_name_input, ''))
+                 
+                 # clean input name
+                 cleaned_input <- gsub(" ", "_", input$common_name_input)
+                 
+                 # select raster
+                 single_spp <- common_name_rast_list[[cleaned_input]]
+                 
+                 valueBox(value = round(minValue(single_spp$cwd_sens), digits = 2), subtitle = "Min Sensitivty", icon = icon("tree")
+                 )
+               })
+               
+               output$mean_sens_box <- renderValueBox({
+                 
+                 validate(need(input$common_name_input, ''))
+                 # clean input name
+                 cleaned_input <- gsub(" ", "_", input$common_name_input)
+                 
+                 # select raster
+                 single_spp <- common_name_rast_list[[cleaned_input]]
+                 
+                 valueBox(value = round(cellStats(single_spp$cwd_sens, stat = 'mean'), digits = 2), subtitle = "Average Sensitivty", icon = icon("tree")
+                 )
+               })
+               
 
-
+  }
+) # END common_name observeEvent
 
 # === DATASET DOWNLOAD ===
 

@@ -64,8 +64,8 @@ body <- dashboardBody(
                   includeMarkdown("text/approach.md")
               ),
               box(width = 6,
-                  title = tagList(icon("tree"), strong("Research")),
-                  includeMarkdown("text/research.md")
+                  title = tagList(icon("tree"), strong("Data Sources")),
+                  includeMarkdown("text/data.md")
                   
                   )
               
@@ -83,33 +83,33 @@ body <- dashboardBody(
               # input box ----
               box(width = 8,
                   title = tagList(icon("tree"), strong("Mapping Tree Vulnerabilty")),
-                  includeMarkdown("text/mapping-tree-vulnerability.md"),
+                  includeMarkdown("text/dashboard-about.md"),
                   #start flowLayout
                   flowLayout(
                   #"selectInputs here"
                   selectInput(inputId = "common_name_input",
                               label = "Common Name",
                               choices = c("Common Name"="", unique(combined_pred$common_name)),
-                              multiple=TRUE,
+                              multiple = FALSE,
                               selectize = TRUE,
                               width = NULL,
                               size = NULL),
                   selectInput(inputId = "sci_name_input",
                               label = "Scientific Name",
                               choices = c("Scientific Name"="",unique(combined_pred$spp)),
-                              multiple=FALSE,
+                              multiple = FALSE,
                               selectize = TRUE,
                               width = NULL,
                               size = NULL),
                   selectInput(inputId = "sp_code_input",
                               label = "Species Code",
                               choices = c("4 Letter Code"="", unique(combined_pred$sp_code)),
-                              multiple=FALSE,
+                              multiple = FALSE,
                               selectize = TRUE,
                               width = NULL,
                               size = NULL)
                   ) # end selectInputs 
-                  # "map input here" 
+                  # CATGEGORICAL VERSUS CONTINUOUS VALUES 
                   # verticalLayout(
                   #   radioGroupButtons(inputId = "map_type_button", 
                   #                label = "Choose map type:",
@@ -119,11 +119,16 @@ body <- dashboardBody(
               # map interpretation box ---
               box(width = 4,
                   title = tags$strong("Transparency"),
-                  includeMarkdown("text/transparency.md")
+                  includeMarkdown("text/transparency.md"),
+                  sliderInput(inputId = "map_transparency_input",
+                              label = NULL,
+                              min = 0.1,
+                              max = 0.9,
+                              value = 0.8)
                   ),
             
     ),# end of fluidRow
-              
+              fluidRow(
               # leaflet box ----
               box(width = 8,
                       
@@ -138,15 +143,22 @@ body <- dashboardBody(
               
               
             #), # END fluidRow
-            
+            tags$style(".small-box.bg-aqua { background-color: #A3b97b !important; color: #295a56 !important; }"),
+            # tags$style(".small-box.bg-purple { background-color: #B03B12 !important; color: #FFFFFF !important; }"),
+            # tags$style(".small-box.bg-blue { background-color: #FFFF00 !important; color: #FFFFFF !important; }"),
               
-              # map interpretation box ---
+              # map summary statistics box ---
               box(width = 4,
-                  title = tags$strong("Summary Statistics")
-                  ) # end interpretation box 
+                  title = tags$strong("Summary Statistics"),
+                  verticalLayout(
+                  valueBoxOutput("max_sens_box", width = 12),
+                  valueBoxOutput("min_sens_box",  width = 12),
+                  valueBoxOutput("mean_sens_box",  width = 12)
+                  )
+                  )# end interpretation box 
               
             
-            
+              )
             
     ), # END dashboard tabItem
     tabItem(tabName = "data",
@@ -190,4 +202,5 @@ body <- dashboardBody(
 ) # END dashboardBody
 
 #..................combine all in dashboardPage..................
-dashboardPage(header, sidebar, body)
+dashboardPage(header, sidebar, body,
+              fresh::use_theme("fresh-theme.css"))

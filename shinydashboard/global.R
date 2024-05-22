@@ -26,11 +26,11 @@ library(sass)
 library(tidyterra)
 
 # ==== COMPILE CSS ==== 
-sass(
-  input = sass_file("www/sass-styles.scss"),
-  output = "www/sass-styles.css",
-  options = sass_options(output_style = "compressed") # OPTIONAL, but speeds up page load time by removing white-space & line-breaks that make css files more human-readable
-)
+# sass(
+#   input = sass_file("www/sass-styles.scss"),
+#   output = "www/sass-styles.css",
+#   options = sass_options(output_style = "compressed") # OPTIONAL, but speeds up page load time by removing white-space & line-breaks that make css files more human-readable
+# )
 
 
 # ==== READ IN DATA ====
