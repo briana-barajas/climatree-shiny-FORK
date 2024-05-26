@@ -96,7 +96,7 @@ body <- dashboardBody(
                               size = NULL),
                   selectInput(inputId = "sci_name_input",
                               label = "Scientific Name",
-                              choices = c("Scientific Name"="",unique(combined_pred$spp)),
+                              choices = c("Scientific Name"="",unique(combined_pred$scientific_name)),
                               multiple = FALSE,
                               selectize = TRUE,
                               width = NULL,
