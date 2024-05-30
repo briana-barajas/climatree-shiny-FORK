@@ -1,114 +1,73 @@
+
+
 ```{r}
 library(tidyverse)
-library(leaflet)
-library(tmap)
-library(paletteer)
-library(terra)
-# library(tmap)
-# 
-# head(pcgl_pred_data)
-# 
-# sp::coordinates(pcgl_pred_data)<- c("x","y")
-# 
-# View(pcgl_pred_data)
-# 
-# 
-# 
-# 
-# # Load your SpatVector object
-pcgl_pred_data_1<- readRDS("~/../../capstone/climatree/output/1-process-raw-data/spp_predictions_pcgl.rds") 
-#   #terra::vect(geom=c("x", "y"), crs="epsg:25831", keepgeom=TRUE) %>% 
-#   terra::rast()
-# 
-# plot(pcgl_pred_data_1)
-# 
-# # cwd_change plot
-# plot(pcgl_pred_data_1[["cwd_change"]])
-# 
-# leaflet() %>% addTiles() %>%
-#   addRasterImage(pcgl_pred_data_1)
-# 
-# tm_shape() %>% 
-#   tm_raster()
-
-# pcgl_pred <- pcgl_pred_data_1 %>% 
-#       rename(lng = x, lat = y) %>% 
-#       dplyr::select(lng, lat, cwd_change, cwd_sens, rwi_pred_change_mean)
-
-aet_raster
-
-# cwd_raster plot
-#plot(pcgl_pred_data_1[["cwd_change"]])
-plot(aet_raster[["layer.1.1.1.1.1"]])
-
-leaflet() %>% addTiles() %>%
-  addRasterImage(aet_raster[["layer.1.1.1.1.1"]])
-
-plot(mean(aet_raster))
-
-
-pcgl_rast <- pcgl_pred_data %>% 
-  terra::rast() %>% 
-  stack()
-
-
-
-# ---begin raster and map steps 
-
-combined_pred_raster <- combined_pred %>%
-  rename(lng = x, lat = y) %>%
-  dplyr::select(lng, lat, cwd_sens, rwi_pred_change_mean) %>%
-  terra::rast() 
-
-crs(combined_pred_raster) <-"epsg:25831"
-
-test_rast <- combined_pred_raster[["cwd_sens"]]
-plot(test_rast)
-
-x = list(ext(test_rast))[[1]][1]
-
-xmin <- xmin(ext(test_rast))
-xmax <- xmax(ext(test_rast))
-ymin <- ymin(ext(test_rast))
-ymax <- ymax(ext(test_rast))
-
-center_lat <- (ymin + ymax) / 2
-center_lon <- (xmin + xmax) / 2
-
-
-map <- leaflet() %>%
-  addProviderTiles("Stamen.Watercolor") %>% 
-  #longitude values are considered the x-coordinate
-  # flyToBounds(lng1 = list(ext(test_rast))[[1]][1], 
-  #             lat1 = list(ext(test_rast))[[1]][3],
-  #             lng2 = list(ext(test_rast))[[1]][2],
-  #             lat2 = list(ext(test_rast))[[1]][4]) %>% 
-  addTiles() %>%
-  #setView(lng = center_lon, lat = center_lat, zoom = 3) %>% 
-  addRasterImage( test_rast ,
-                 colors = palette_orange_blue,
-                 opacity = 1)
-  
-  # Set the view using the
-  # extent's center and a zoom level
-
-
-#---end steps 
-
-  
-crs(aet_raster)
-
-cwd_raster
-
-# pcgl_pred_data<- read_rds("~/../../capstone/climatree/output/1-process-raw-data/spp_predictions_pcgl.rds")
-# 
-# essential_cwd<- read_csv("~/../../capstone/climatree/raw_data/essentialcwd_data.csv")
-# 
-# species_meta <- read_csv("~/../../capstone/climatree/raw_data/species_metadata.csv")
-# 
-# top_sp_codes <- read_csv("~/../../capstone/climatree/output/1-process-raw-data/top_sp_codes.csv")
-
-combined_pred <- read_csv("~/../../capstone/climatree/output/final-output/combined_predictions.csv")
-
-combined_pred
+library(ggplot2)
 ```
+
+
+```{r}
+spp <- combined_pred %>% filter(sp_code == "pcgl")
+
+spp_sum <- combined_pred %>% 
+  filter(sp_code == "pcgl") %>% 
+  group_by(sens_level) %>% 
+  summarise(max = round(max(drought_sens), 3),
+            min = round(min(drought_sens), 3)) %>% 
+  mutate(diff = round(max - min, 3))
+
+
+```
+
+```{r}
+ggplot(spp_sum) +
+  geom_segment(aes(x = min, xend = max, y = 1, col = sens_level), linewidth = 25) +
+  scale_color_manual(values = c("High Sensitivity" = "#B03B12",
+                                "Moderate Sensitivity" = "#EC9971",
+                                "Low Sensitivity" = "#F9E0D2",
+                                "Least Concern" = "#144D6F")) +
+  geom_text(aes(x = min, y = 1, label = min), vjust = 4, size = 4) +
+  geom_text(aes(x = max(max), y = 1, label = max(max)), vjust = 4, size = 4)
+
+```
+
+```{r}
+spp <- combined_pred %>% filter(sp_code == "pcgl")
+
+avg <- round(mean(spp$drought_sens), 3)
+
+spp_sum <- combined_pred %>% 
+  filter(sp_code == "pcgl") %>% 
+  group_by(sens_level) %>% 
+  summarise(max = round(max(drought_sens), 3),
+            min = round(min(drought_sens), 3)) %>% 
+  ungroup() %>% 
+  pivot_longer(cols = c(max, min), names_to = "stat", values_to = "value") %>% 
+  distinct(value) %>% 
+  arrange(value)
+  
+
+ggplot() + 
+  
+  
+  geom_segment(aes(x = spp_sum[2,1], xend = spp_sum[1,1], y = 1), col = "#B03B12", linewidth = 25) 
+
++
+  geom_segment(aes(x = spp_sum[2,1], xend = spp_sum[3,1], y = 1), col = "#EC9971", linewidth = 25) +
+  geom_segment(aes(x = spp_sum[3,1], xend = spp_sum[4,1], y = 1), col = "#F9E0D2", linewidth = 25) +
+  geom_segment(aes(x = spp_sum[4,1], xend = spp_sum[5,1], y = 1), col = "#144D6F", linewidth = 25)
+
+
+  
+  # add minimum values as label
+  geom_text(aes(x = 1, y = 1, label = spp_sum[1,1]), vjust = 8) +
+  geom_text(aes(x = 2, y = 1, label = spp_sum[2,1]), vjust = 8) +
+  geom_text(aes(x = 3, y = 1, label = spp_sum[3,1]), vjust = 8) +
+  geom_text(aes(x = 4, y = 1, label = spp_sum[4,1]), vjust = 8) +
+  geom_text(aes(x = 5, y = 1, label = spp_sum[5,1]), vjust = 8)
+
+
+```
+
+
+

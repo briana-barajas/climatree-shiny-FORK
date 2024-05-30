@@ -15,7 +15,6 @@ sidebar <- dashboardSidebar(
     
     menuItem(text = "About", tabName = "about", icon = icon("house")),
     menuItem(text = "Sensitivity Maps", tabName = "dashboard", icon = icon("leaf")),
-    #menuItem(text = "Research", tabName = "research", icon = icon("lightbulb")),
     menuItem(text = "Data", tabName = "data", icon = icon("floppy-disk"))
     
   ) # END sidebarMenu
@@ -47,15 +46,15 @@ body <- dashboardBody(
                      box(width = 12,
                          includeMarkdown("text/background.md")
                      )),# END overview fluidRow
-
+            
             # range map box ----
             fluidRow(width = 12,
                      
                      box(width = 12,
                          title = tagList(icon("earth-americas"), strong("Included Species Ranges")),
                          tags$img(src = "range_26.jpg", 
-                              alt = "A Map of 26 species within a global context. A majority of our range is within the Northern Hemisphere.",
-                              style = "max-width:80%; text-align: center;display: block; margin-left: auto; margin-right: auto;"))),
+                                  alt = "A Map of 26 species within a global context. A majority of our range is within the Northern Hemisphere.",
+                                  style = "max-width:80%; text-align: center;display: block; margin-left: auto; margin-right: auto;"))),
             
             # explore spp table ----
             fluidRow(width = 12,
@@ -105,6 +104,7 @@ body <- dashboardBody(
               # END input box --
               # map interpretation box ---
               box(width = 4,
+                  height = 244,
                   title = tags$strong("Transparency"),
                   includeMarkdown("text/transparency.md"),
                   sliderInput(inputId = "map_transparency_input",
@@ -117,7 +117,7 @@ body <- dashboardBody(
             ),# end of fluidRow
             fluidRow(
               # leaflet box ----
-              box(width = 8,
+              box(width = 12,
                   
                   title = tags$strong("Tree Species Sensitivity to Drought"),
                   
@@ -127,22 +127,7 @@ body <- dashboardBody(
                   
                   
               ), # END leaflet box
-              
-              
-              #), # END fluidRow
-              tags$style(".small-box.bg-aqua { background-color: #A3b97b !important; color: #295a56 !important; }"),
-              
-              # map summary statistics box ---
-              box(width = 4,
-                  title = tags$strong("Summary Statistics"),
-                  verticalLayout(
-                    valueBoxOutput("max_sens_box", width = 12),
-                    valueBoxOutput("min_sens_box",  width = 12),
-                    valueBoxOutput("mean_sens_box",  width = 12)
-                  )
-              )# end interpretation box 
-              
-              
+
             )
             
     ), # END dashboard tabItem
@@ -150,6 +135,7 @@ body <- dashboardBody(
             
             # fluidRow ----
             fluidRow(
+              
               # input species box ----
               box(width = 8,
                   
@@ -160,33 +146,39 @@ body <- dashboardBody(
                   flowLayout(
                     pickerInput(inputId = "download_common_name_input",
                                 label = "Common Name",
-                                choices = c("Common Name"="", unique(combined_pred$common_name)),
-                                multiple = TRUE),
-                    selectInput(inputId = "download_sci_name_input",
+                                choices = unique(combined_pred$common_name),
+                                multiple = TRUE,
+                                options = pickerOptions(actionsBox = TRUE)),
+                    
+                    pickerInput(inputId = "download_sci_name_input",
                                 label = "Scientific Name",
-                                choices = c("Scientific Name"="",unique(combined_pred$scientific_name)),
-                                multiple = TRUE),
-                    selectInput(inputId = "download_sp_code_input",
+                                choices = unique(combined_pred$scientific_name),
+                                multiple = TRUE,
+                                options = pickerOptions(actionsBox = TRUE)),
+                    
+                    pickerInput(inputId = "download_sp_code_input",
                                 label = "Species Code",
-                                choices = c("Species Code"="", unique(combined_pred$sp_code)),
-                                multiple = TRUE)
+                                choices = unique(combined_pred$sp_code),
+                                multiple = TRUE,
+                                options = pickerOptions(actionsBox = TRUE))
                   ) # END download picker inputs
                   
               ),# END input species box 
               box(width = 4,
+                  height = 189,
                   # Button
                   "Click here to Download CSV",br(),
                   downloadButton("downloadData", "Download")
-              )
-              
-            ),# END fluidRow
+              )),# END fluidRow download species input
+            
+            
             # fluid row for example table
             fluidRow(
-              box( width = 12,
-                   DT::dataTableOutput(outputId = "data_table_output") %>% 
-                     withSpinner(color = "#cb9e72", type = 1)
-              )
-            )
+              box(width = 12,
+                  DT::dataTableOutput(outputId = "reactive_download_table_output") %>% 
+                    withSpinner(color = "#cb9e72", type = 1)
+              ))
+            
     ) # END data tabItem
     
   ) # END tabItems
